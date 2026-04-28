@@ -1,0 +1,24 @@
+/*
+ * Local theme scaffold.
+ *
+ * This file layers on top of the active base theme automatically. Keep
+ * shared theme structure in the base theme; put instance-local visual
+ * overrides here.
+ */
+
+:root {
+  /* Palette tokens */
+  /* --palette-brand-500: #7c3aed; */
+
+  /* Semantic tokens */
+  /* --color-brand: var(--palette-brand-500); */
+}
+
+[data-theme="dark"] {
+  /* Semantic tokens */
+  /* --color-brand: #a78bfa; */
+}
+
+@theme inline {
+  /* --color-brand: var(--color-brand); */
+}
