@@ -19,7 +19,6 @@ plugins:
     git:
       repo: rizom-ai/doc-brain-content
       branch: main
-      authToken: ${GIT_SYNC_TOKEN}
       authorName: Rizom Docs Bot
       authorEmail: docs@rizom.ai
   mcp:

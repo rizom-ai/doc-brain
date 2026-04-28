@@ -1,5 +1,5 @@
 import { Fragment, h, type ComponentChildren, type JSX } from "preact";
-import { professionalSitePlugin, type SitePackage } from "@rizom/brain/site";
+import type { Plugin, SitePackage } from "@rizom/brain/site";
 
 const docsSections = [
   {
@@ -17,6 +17,15 @@ const DocsLayout = ({
 }: {
   sections: ComponentChildren[];
 }): JSX.Element => h(Fragment, null, ...sections);
+
+const docsSitePlugin = (): Plugin =>
+  ({
+    id: "doc-brain-site",
+    version: "0.1.0",
+    type: "service",
+    packageName: "doc-brain",
+    register: async () => ({ tools: [], resources: [] }),
+  }) as unknown as Plugin;
 
 const site: SitePackage = {
   layouts: {
@@ -46,7 +55,7 @@ const site: SitePackage = {
       sections: docsSections,
     },
   ],
-  plugin: (config) => professionalSitePlugin(config ?? {}),
+  plugin: () => docsSitePlugin(),
   entityDisplay: {
     doc: {
       label: "Doc",
