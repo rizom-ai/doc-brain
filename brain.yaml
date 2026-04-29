@@ -5,10 +5,6 @@ domain: docs.rizom.ai
 preset: default
 add:
   - docs
-remove:
-  - discord
-  - a2a
-
 anchors: []
 
 plugins:
@@ -19,7 +15,8 @@ plugins:
     git:
       repo: rizom-ai/doc-brain-content
       branch: main
-      authorName: Rizom Docs Bot
-      authorEmail: docs@rizom.ai
+      authToken: ${GIT_SYNC_TOKEN}
   mcp:
     authToken: ${MCP_AUTH_TOKEN}
+  discord:
+    botToken: ${DISCORD_BOT_TOKEN}
