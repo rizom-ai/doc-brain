@@ -29,13 +29,13 @@ jobs:
       - name: Validate env via varlock
         env:
           BWS_ACCESS_TOKEN: ${{ secrets.BWS_ACCESS_TOKEN }}
-        run: npx -y varlock load --path .env.schema
+        run: bunx varlock@1.1.0 load --path .env.schema
 
       - name: Load env via varlock
         env:
           BWS_ACCESS_TOKEN: ${{ secrets.BWS_ACCESS_TOKEN }}
         run: |
-          npx -y varlock load --path .env.schema --format json --compact > /tmp/varlock-env.json
+          bunx varlock@1.1.0 load --path .env.schema --format json --compact > /tmp/varlock-env.json
           node <<'NODE'
           import { appendFileSync, readFileSync } from "node:fs";
           const env = JSON.parse(readFileSync('/tmp/varlock-env.json', 'utf8'));
