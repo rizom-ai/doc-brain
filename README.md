@@ -23,7 +23,11 @@ bunx brain start
 
 Required local secrets live in `.env` copied from `.env.example`.
 At minimum, local docs sync needs `AI_API_KEY` and `GIT_SYNC_TOKEN`.
-Set `MCP_AUTH_TOKEN` and `DISCORD_BOT_TOKEN` when exercising those interfaces.
+Set `DISCORD_BOT_TOKEN` when exercising Discord.
+
+MCP HTTP uses the built-in Brain OAuth/passkey flow. Do not set
+`MCP_AUTH_TOKEN` for the deployed docs app unless intentionally testing the
+deprecated static-token fallback.
 
 ## Content
 
