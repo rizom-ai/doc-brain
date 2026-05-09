@@ -60,6 +60,10 @@ jobs:
               return [];
             }
 
+            if (text.length > 0) {
+              console.log('::add-mask::' + text);
+            }
+
             return [key + '=' + text];
           });
 
@@ -194,6 +198,13 @@ jobs:
           echo "SSH never became ready for $SSH_USER@$SERVER_IP; last attempt output:" >&2
           ssh "$SSH_USER@$SERVER_IP" true >&2 || true
           exit 1
+
+      - name: Release stale Kamal deploy lock
+        env:
+          SERVER_IP: ${{ steps.provision.outputs.server_ip }}
+          VERSION: ${{ github.event.workflow_run.head_sha || github.sha }}
+          PREVIEW_DOMAIN: ${{ env.PREVIEW_DOMAIN }}
+        run: kamal lock release || true
 
       - name: Deploy
         env:
