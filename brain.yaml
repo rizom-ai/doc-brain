@@ -5,7 +5,8 @@ domain: docs.rizom.ai
 preset: default
 add:
   - docs
-anchors: []
+anchors:
+  - "discord:1442828818493735015"
 
 plugins:
   directory-sync:
