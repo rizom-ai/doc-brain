@@ -35,11 +35,11 @@ env:
   secret:
     - AI_API_KEY
     - GIT_SYNC_TOKEN
+    - MCP_AUTH_TOKEN
     - DISCORD_BOT_TOKEN
 
 volumes:
   - /opt/brain-data:/app/brain-data
-  - /opt/brain-runtime:/app/data
   - /opt/brain-state:/data
   - /opt/brain-config:/config
   - /opt/brain-dist:/app/dist
