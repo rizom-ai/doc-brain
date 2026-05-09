@@ -202,6 +202,14 @@ jobs:
           PREVIEW_DOMAIN: ${{ env.PREVIEW_DOMAIN }}
         run: kamal setup --skip-push
 
+      - name: Print OAuth setup URL
+        env:
+          SERVER_IP: ${{ steps.provision.outputs.server_ip }}
+        run: |
+          SSH_USER="$(ruby -e 'require "yaml"; config = YAML.load_file("config/deploy.yml") || {}; puts(config.dig("ssh", "user") || "root")')"
+          CONTAINER="$(ssh "$SSH_USER@$SERVER_IP" 'docker ps --filter label=service=brain --filter label=role=web --format "{{.Names}}" | head -1')"
+          ssh "$SSH_USER@$SERVER_IP" "docker logs --tail 200 \"$CONTAINER\" 2>&1" | grep -E 'Passkey setup required|/setup\\?token=' || true
+
       - name: Verify origin TLS
         env:
           SERVER_IP: ${{ steps.provision.outputs.server_ip }}
