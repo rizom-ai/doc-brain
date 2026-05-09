@@ -47,22 +47,15 @@ jobs:
 
           const newline = String.fromCharCode(10);
           const carriageReturn = String.fromCharCode(13);
+          const bootstrapSecrets = new Set(["BWS_ACCESS_TOKEN"]);
           const lines = Object.entries(env).flatMap(([key, value]) => {
-            if (key === 'BWS_ACCESS_TOKEN' || value === null || value === undefined) {
+            if (bootstrapSecrets.has(key) || value === null || value === undefined) {
               return [];
             }
 
             const text = String(value)
               .split(carriageReturn + newline)
               .join(newline);
-            const escapedMask = text
-              .replace(/%/g, '%25')
-              .replace(/\r/g, '%0D')
-              .replace(/\n/g, '%0A');
-            if (escapedMask.length > 0) {
-              process.stdout.write('::add-mask::' + escapedMask + newline);
-            }
-
             if (text.includes(newline)) {
               return [];
             }
