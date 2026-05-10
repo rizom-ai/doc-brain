@@ -1,0 +1,91 @@
+name: Cleanup Production Skills
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: Load env via varlock
+        env:
+          BWS_ACCESS_TOKEN: ${{ secrets.BWS_ACCESS_TOKEN }}
+        run: |
+          bunx varlock@1.1.0 load --path .env.schema --format json --compact > /tmp/varlock-env.json
+          node <<'NODE'
+          import { appendFileSync, readFileSync } from 'node:fs';
+          const env = JSON.parse(readFileSync('/tmp/varlock-env.json', 'utf8'));
+          for (const key of ['HCLOUD_TOKEN', 'KAMAL_SSH_PRIVATE_KEY']) {
+            const value = env[key];
+            if (!value) throw new Error(`Missing ${key}`);
+            const text = String(value).replace(/\r\n/g, '\n');
+            appendFileSync(process.env.GITHUB_ENV, `${key}<<${key}_EOF\n${text}\n${key}_EOF\n`);
+          }
+          NODE
+
+      - name: Resolve Hetzner server IP
+        env:
+          INSTANCE_NAME: ${{ github.event.repository.name }}
+        run: |
+          node <<'NODE'
+          import { appendFileSync } from 'node:fs';
+          const token = process.env.HCLOUD_TOKEN;
+          const instanceName = process.env.INSTANCE_NAME;
+          const selector = encodeURIComponent(`brain=${instanceName}`);
+          const res = await fetch(`https://api.hetzner.cloud/v1/servers?label_selector=${selector}`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          const payload = await res.json();
+          if (!res.ok) throw new Error(JSON.stringify(payload));
+          const server = payload.servers?.[0];
+          const ip = server?.public_net?.ipv4?.ip;
+          if (!ip) throw new Error(`No server IP found for ${instanceName}`);
+          appendFileSync(process.env.GITHUB_ENV, `SERVER_IP=${ip}\n`);
+          NODE
+
+      - name: Write SSH key
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$KAMAL_SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          chmod 600 ~/.ssh/id_ed25519
+          cat > ~/.ssh/config <<'EOF'
+          Host *
+            IdentityFile ~/.ssh/id_ed25519
+            IdentitiesOnly yes
+            BatchMode yes
+            ConnectTimeout 10
+            StrictHostKeyChecking no
+            UserKnownHostsFile /dev/null
+          EOF
+          chmod 600 ~/.ssh/config
+
+      - name: Delete stale skill entities from production DB
+        run: |
+          SSH_USER="$(ruby -e 'require "yaml"; config = YAML.load_file("config/deploy.yml") || {}; puts(config.dig("ssh", "user") || "root")')"
+          ssh "$SSH_USER@$SERVER_IP" 'bash -s' <<'REMOTE'
+          set -euo pipefail
+          container="$(docker ps --format "{{.Names}}" | grep -E "^brain-web|^brain-web-|^brain" | head -n1)"
+          if [ -z "$container" ]; then
+            echo "No brain container found" >&2
+            docker ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}" >&2
+            exit 1
+          fi
+          docker exec "$container" bun -e '
+            const Database = require("better-sqlite3");
+            const db = new Database("/app/data/brain.db");
+            const before = db.prepare("select count(*) as count from entities where entityType = ?").get("skill").count;
+            db.exec(`
+              delete from embeddings where entity_type = 'skill';
+              delete from entity_fts where entity_type = 'skill';
+              delete from entities where entityType = 'skill';
+            `);
+            const after = db.prepare("select count(*) as count from entities where entityType = ?").get("skill").count;
+            console.log(JSON.stringify({ before, after }));
+          '
+          docker restart "$container"
+          REMOTE
