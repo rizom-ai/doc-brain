@@ -7,6 +7,8 @@ add:
   - docs
 anchors:
   - "discord:1442828818493735015"
+spaces:
+  - "discord:1503073726105915392"
 
 plugins:
   directory-sync:
