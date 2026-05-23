@@ -4,10 +4,12 @@
   "type": "module",
   "scripts": {
     "start": "bunx brain start",
+    "start:local": "bunx varlock@1.1.0 run --path ./ -- sh -c 'unset DISCORD_BOT_TOKEN; exec bunx brain start'",
+    "start:bitwarden": "bunx varlock@1.1.0 run --path ./ -- bunx brain start",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@rizom/brain": "0.2.0-alpha.68",
+    "@rizom/brain": "^0.2.0-alpha.83",
     "preact": "^10.27.2"
   },
   "devDependencies": {
