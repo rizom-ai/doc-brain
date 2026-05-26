@@ -9,7 +9,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@rizom/brain": "0.2.0-alpha.84",
+    "@rizom/brain": "0.2.0-alpha.93",
     "preact": "^10.27.2"
   },
   "devDependencies": {
