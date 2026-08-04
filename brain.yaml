@@ -1,10 +1,11 @@
-brain: relay
+brain: brain
 domain: docs.rizom.ai
 
-# Relay public-site preset plus first-class docs entities.
-preset: default
-add:
-  - docs
+# Canonical team brain with a public documentation site.
+bundles:
+  - core
+  - site
+  - team
 anchors:
   - "discord:1442828818493735015"
 spaces:
@@ -19,5 +20,12 @@ plugins:
       repo: rizom-ai/doc-brain-content
       branch: main
       authToken: ${GIT_SYNC_TOKEN}
-  discord:
-    botToken: ${DISCORD_BOT_TOKEN}
+    seedContentPath: ./seed-content
+  chat:
+    adapters:
+      discord:
+        botToken: ${DISCORD_BOT_TOKEN}
+anchor: team
+kind: team
+site:
+  theme: "@brains/theme-rizom"
